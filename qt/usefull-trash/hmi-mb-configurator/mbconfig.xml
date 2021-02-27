@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mbconfig version="0.0.0.1">
+	<mbobject type="QMbCurrentForm" name="main">
+		<opt type="self">
+			<regtype>HR</regtype>
+			<address>1</address>
+			<len>1</len>
+			<params>
+				<p idx="0" val="user_form_1.ui" />
+				<p idx="1" val="user_form_2.ui" />
+			</params>
+		</opt>
+	</mbobject>
+	<form name="user_form_1.ui" id="1">
+		<mbobject type="QLCDNumber" name="lcdNum">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>2</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QProgressBar" name="progBar">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>3</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QLabel" name="lbl">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>4</address>
+				<len>1</len>
+				<params>
+					<p idx="0" val="text on label" />
+					<p idx="1" val="new text" />
+				</params>
+			</opt>
+		</mbobject>
+		<mbobject type="QLineEdit" name="lineEdit">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>5</address>
+				<len>1</len>
+			</opt>
+			<opt type="editingFinished"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>2</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QSpinBox" name="spin">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>6</address>
+				<len>1</len>
+			</opt>
+			<opt type="valueChanged"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>3</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QSlider" name="slider">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>7</address>
+				<len>1</len>
+			</opt>
+			<opt type="valueChanged"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>4</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QDial" name="dial">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>8</address>
+				<len>1</len>
+			</opt>
+			<opt type="valueChanged"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>5</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QCheckBox" name="chckBox">
+			<opt type="self"> <!-- check setup -->
+				<regtype>HR</regtype>
+				<address>9</address>
+				<len>1</len>
+			</opt>
+			<opt type="stateChanged"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>6</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QComboBox" name="cmbBx">
+			<opt type="self">
+				<regtype>HR</regtype>
+				<address>10</address>
+				<len>1</len>
+				<params>
+					<p idx="0" val="cmb-1" />
+					<p idx="1" val="cmb-2" />
+				</params>
+			</opt>
+			<opt type="currentIndexChanged"> <!-- chg counter -->
+				<regtype>IR</regtype>
+				<address>7</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QPushButton" name="pushButton">
+			<opt type="clicked">  <!-- clck counter -->
+				<regtype>IR</regtype>
+				<address>8</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+		<mbobject type="QAction" name="action1">
+			<opt type="triggered">  <!-- trg counter -->
+				<regtype>IR</regtype>
+				<address>9</address>
+				<len>1</len>
+			</opt>
+		</mbobject>
+	</form>
+</mbconfig>

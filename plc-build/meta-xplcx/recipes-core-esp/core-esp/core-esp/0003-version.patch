@@ -1,0 +1,7 @@
+diff --git a/hmi_version b/hmi_version
+new file mode 100644
+index 0000000..3e9d77e
+--- /dev/null
++++ b/hmi_version
+@@ -0,0 +1 @@
++"0.0.0.1","22.05.2019"

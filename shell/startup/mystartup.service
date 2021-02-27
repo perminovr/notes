@@ -1,0 +1,13 @@
+[Unit]
+Description=My settings up
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+PIDFile=/run/mystartup.pid
+ExecStart=/usr/bin/mystartup.sh start
+ExecStop=/usr/bin/mystartup.sh stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+#undef Q_PROPERTY_IMPLEMENTATION
+#define Q_PROPERTY_IMPLEMENTATION(type, name, getter, setter, notifier) \
+    public slots: void setter(type t) { type old = this->m_##name; this->m_##name = t; if (old != t) emit this->notifier(); } \
+    public: type getter() const { return this->m_##name; } \
+    Q_SIGNAL void notifier(); \
+    private: type m_##name;

@@ -1,0 +1,26 @@
+diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
+index 7149a2a..24fb998 100644
+--- a/src/client/qwaylandwindow.cpp
++++ b/src/client/qwaylandwindow.cpp
+@@ -951,7 +951,7 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
+ 
+ void QWaylandWindow::requestActivateWindow()
+ {
+-    qCWarning(lcQpaWayland) << "Wayland does not support QWindow::requestActivate()";
++    //qCWarning(lcQpaWayland) << "Wayland does not support QWindow::requestActivate()";
+ }
+ 
+ void QWaylandWindow::unfocus()
+diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp b/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
+index 6e48659..a5c003d 100644
+--- a/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
++++ b/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
+@@ -315,7 +315,7 @@ QWaylandGLContext::QWaylandGLContext(EGLDisplay eglDisplay, QWaylandDisplay *dis
+        mSupportNonBlockingSwap = false;
+     }
+     if (!mSupportNonBlockingSwap) {
+-        qWarning() << "Non-blocking swap buffers not supported. Subsurface rendering can be affected.";
++        //qWarning() << "Non-blocking swap buffers not supported. Subsurface rendering can be affected.";
+     }
+ 
+     updateGLFormat();

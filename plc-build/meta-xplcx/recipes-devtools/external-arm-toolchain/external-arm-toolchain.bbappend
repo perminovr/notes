@@ -1,0 +1,9 @@
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+PR_append = "-e1"
+
+INHIBIT_PACKAGE_STRIP = "0"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "0"
+
+EXTRA_OECONF += " --strip-all "

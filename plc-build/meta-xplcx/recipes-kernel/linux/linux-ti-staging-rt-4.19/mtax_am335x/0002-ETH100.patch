@@ -1,0 +1,13 @@
+diff --git a/drivers/net/phy/phy_device.c b/drivers/net/phy/phy_device.c
+index 62c3fb9..bd68a1e 100644
+--- a/drivers/net/phy/phy_device.c
++++ b/drivers/net/phy/phy_device.c
+@@ -1343,7 +1343,7 @@ static int genphy_config_advert(struct phy_device *phydev)
+ 
+ 	if (phydev->supported & (SUPPORTED_1000baseT_Half |
+ 				 SUPPORTED_1000baseT_Full)) {
+-		adv |= ethtool_adv_to_mii_ctrl1000_t(advertise);
++//		adv |= ethtool_adv_to_mii_ctrl1000_t(advertise);
+ 	}
+ 
+ 	if (adv != oldadv)

@@ -1,0 +1,20 @@
+diff --git a/include/drm/drm_legacy.h b/include/drm/drm_legacy.h
+index 8fad66f..27f27bf 100644
+--- a/include/drm/drm_legacy.h
++++ b/include/drm/drm_legacy.h
+@@ -161,7 +161,15 @@ int drm_legacy_rmmap_locked(struct drm_device *d, struct drm_local_map *map);
+ void drm_legacy_master_rmmaps(struct drm_device *dev,
+ 			      struct drm_master *master);
+ struct drm_local_map *drm_legacy_getsarea(struct drm_device *dev);
++#ifdef CONFIG_DRM_VM
+ int drm_legacy_mmap(struct file *filp, struct vm_area_struct *vma);
++#else
++static inline int drm_legacy_mmap(struct file *filp, struct vm_area_struct *vma)
++{
++	/* do nothing */
++	return 0;
++}
++#endif
+ 
+ int drm_legacy_addbufs_agp(struct drm_device *d, struct drm_buf_desc *req);
+ int drm_legacy_addbufs_pci(struct drm_device *d, struct drm_buf_desc *req);

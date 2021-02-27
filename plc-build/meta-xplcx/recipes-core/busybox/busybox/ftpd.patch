@@ -1,0 +1,109 @@
+--- a/networking/ftpd.c	2018-07-02 18:23:06.000000000 +0700
++++ b/networking/ftpd.c	2020-05-14 09:00:30.279506291 +0700
+Ключи имени и пароля -n NAME -p PASSWORD;
+Для доступа к файлам/директориям пользователь (NAME) должен существовать в системе
+и иметь права на файлы/директории (ключ -w для указания рабочей директории);
+В сочетании с указанием порта для inetd позволяет специализировать FTP доступ
+
+Добавлен дополнительный поиск пользователя в "/var/run/passwd" (pamlike_lookup)
+@@ -1120,6 +1120,50 @@
+ 	return cmdval;
+ }
+ 
++#define PAMDB "/var/run/passwd"
++
++static int pamlike_lookup(const char *user, const char *pass)
++{
++    FILE *fp;
++    int c, c1;
++    char line[255] = "";
++    char *userid;
++    char *userpass;
++    char *saveptr1;
++
++    if (user && pass) {
++		fp = fopen(PAMDB, "r");		
++		if (fp >= 0) {
++			while( fgets(line, sizeof(line), fp) != 0 ) {
++				userid = strtok_r(line, ": ", &saveptr1);
++				userpass = strtok_r(0, ": \n", &saveptr1);
++
++				if ( !userid || (c = strlen(userid)) == 0 )
++					break;
++				if ( !userpass || (c1 = strlen(userpass)) < 2 )
++					break;
++
++				if ( strncasecmp(userid, user, c) == 0 ) {
++					char *cryptpw;
++					char salt[2];
++
++					salt[0] = *(userpass + 0);
++					salt[1] = *(userpass + 1);
++
++					cryptpw = crypt(pass, salt);
++
++					if (cryptpw && strncasecmp(userpass, cryptpw, c1) == 0) {
++						fclose(fp);
++						return 0;
++					}
++				}
++			}
++			fclose(fp);
++		}
++    }
++    return -1;
++}
++
+ #define mk_const4(a,b,c,d) (((a * 0x100 + b) * 0x100 + c) * 0x100 + d)
+ #define mk_const3(a,b,c)    ((a * 0x100 + b) * 0x100 + c)
+ enum {
+@@ -1179,6 +1223,8 @@
+ 	unsigned abs_timeout;
+ 	unsigned verbose_S;
+ 	smallint opts;
++	char *specified_login = 0;
++	char *specified_passwd = 0;
+ 
+ 	INIT_G();
+ 
+@@ -1187,15 +1233,19 @@
+ 	G.timeout = 2 * 60;
+ #if BB_MMU
+ 	opts = getopt32(argv, "^"   "AvS" IF_FEATURE_FTPD_WRITE("w")
++		"n:p:"
+ 		"t:+T:+" IF_FEATURE_FTPD_AUTHENTICATION("a:")
+ 		"\0" "vv:SS",
++		&specified_login, &specified_passwd,
+ 		&G.timeout, &abs_timeout, IF_FEATURE_FTPD_AUTHENTICATION(&anon_opt,)
+ 		&G.verbose, &verbose_S
+ 	);
+ #else
+ 	opts = getopt32(argv, "^" "l1AvS" IF_FEATURE_FTPD_WRITE("w")
++		"n:p:"
+ 		"t:+T:+" IF_FEATURE_FTPD_AUTHENTICATION("a:")
+ 		"\0" "vv:SS",
++		&specified_login, &specified_passwd,
+ 		&G.timeout, &abs_timeout, IF_FEATURE_FTPD_AUTHENTICATION(&anon_opt,)
+ 		&G.verbose, &verbose_S
+ 	);
+@@ -1274,9 +1324,19 @@
+ 				pw = getpwnam(G.ftp_arg);
+ 				cmdio_write_raw(STR(FTP_GIVEPWORD)" Specify password\r\n");
+ 			} else if (cmdval == const_PASS) {
+-				if (check_password(pw, G.ftp_arg) > 0) {
++				if (specified_login) {
++					if (strcmp(pw->pw_name, specified_login) != 0) {
++						goto passw_fail;
++					}
++				}
++				if (specified_passwd) {
++					if (strcmp(G.ftp_arg, specified_passwd) == 0)
++						break;	/* login success */
++				}
++				else if (check_password(pw, G.ftp_arg) > 0 || pamlike_lookup(pw->pw_name, G.ftp_arg) == 0) {
+ 					break;	/* login success */
+ 				}
++			passw_fail:
+ 				cmdio_write_raw(STR(FTP_LOGINERR)" Login failed\r\n");
+ 				pw = NULL;
+ 			} else if (cmdval == const_QUIT) {

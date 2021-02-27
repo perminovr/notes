@@ -1,0 +1,4 @@
+﻿module Perri
+Led 1.0 Led.qml
+plugin qmlqperriplugin
+typeinfo plugins.qmltypes

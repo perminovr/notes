@@ -1,0 +1,7 @@
+gcc dbus-server.c -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/dbus-1.0 -o server -ldbus-1
+gcc dbus-client.c -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include -I/usr/include/dbus-1.0 -o client -ldbus-1
+
+if [ ! -f "/etc/dbus-1/system.d/com.roman.client.conf" -o ! -f "/etc/dbus-1/system.d/com.roman.server.conf" ] && [ ! -f "/usr/share/dbus-1/system.d/com.roman.client.conf" -o ! -f "/usr/share/dbus-1/system.d/com.roman.server.conf" ]; then
+	echo "copy com.roman.client.conf com.roman.server.conf to /etc/dbus-1/system.d/ or /usr/share/dbus-1/system.d/" 
+	echo "and relog/restart"
+fi

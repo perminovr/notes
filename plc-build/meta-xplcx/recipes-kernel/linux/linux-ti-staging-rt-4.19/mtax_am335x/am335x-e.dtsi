@@ -1,0 +1,201 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+#include "am33xx.dtsi"
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+	model = "AM335x";
+	compatible = "ti,am335x-bone", "ti,am33xx";
+
+	cpus {
+		cpu@0 {
+			cpu0-supply = <&dcdc3_reg>;
+		};
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x80000000 0x8000000>; /* 128 MB */
+	};
+
+        vmmc_reg: fixedregulator@0 {
+		compatible = "regulator-fixed";
+		regulator-name = "vmmc";
+	        regulator-min-microvolt = <3300000>;
+	        regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+	        regulator-always-on;
+	};
+};
+
+
+&am33xx_pinmux {
+        pinctrl-names = "default";
+
+        i2c0_pins: pinmux_i2c0_pins {
+            pinctrl-single,pins = <
+                0x188 (PIN_INPUT | PIN_OUTPUT | PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_sda.i2c0_sda */
+                0x18c (PIN_INPUT | PIN_OUTPUT | PIN_INPUT_PULLUP | MUX_MODE0)	/* i2c0_scl.i2c0_scl */
+            >;
+        };
+
+        davinci_mdio_default: davinci_mdio_default {
+            pinctrl-single,pins = <
+                /* MDIO */
+                0x148 (PIN_INPUT_PULLUP | INPUT_EN | SLEWCTRL_FAST | MUX_MODE0)	/* mdio_data.mdio_data */
+                0x14c (PIN_OUTPUT_PULLUP | MUX_MODE0)			/* mdio_clk.mdio_clk */
+            >;
+        };
+
+        davinci_mdio_sleep: davinci_mdio_sleep {
+            pinctrl-single,pins = <
+                /* MDIO reset value */
+                0x148 (PIN_INPUT_PULLDOWN | MUX_MODE7)
+                0x14c (PIN_INPUT_PULLDOWN | MUX_MODE7)
+            >;
+        };
+
+        nandflash_pins_s0: nandflash_pins_s0 {
+            pinctrl-single,pins = <
+                0x0 (PIN_INPUT_PULLUP | MUX_MODE0)      /* gpmc_ad0.gpmc_ad0 */
+                0x4 (PIN_INPUT_PULLUP | MUX_MODE0)      /* gpmc_ad1.gpmc_ad1 */
+                0x8 (PIN_INPUT_PULLUP | MUX_MODE0)      /* gpmc_ad2.gpmc_ad2 */
+                0xc (PIN_INPUT_PULLUP | MUX_MODE0)      /* gpmc_ad3.gpmc_ad3 */
+                0x10 (PIN_INPUT_PULLUP | MUX_MODE0)     /* gpmc_ad4.gpmc_ad4 */
+                0x14 (PIN_INPUT_PULLUP | MUX_MODE0)     /* gpmc_ad5.gpmc_ad5 */
+                0x18 (PIN_INPUT_PULLUP | MUX_MODE0)     /* gpmc_ad6.gpmc_ad6 */
+                0x1c (PIN_INPUT_PULLUP | MUX_MODE0)     /* gpmc_ad7.gpmc_ad7 */
+                0x70 (PIN_INPUT_PULLUP | MUX_MODE0)     /* gpmc_wait0.gpmc_wait0 */
+                0x74 (PIN_INPUT_PULLUP | MUX_MODE7)     /* gpmc_wpn.gpio0_30 */
+                0x7c (PIN_OUTPUT | MUX_MODE0)           /* gpmc_csn0.gpmc_csn0  */
+                0x90 (PIN_OUTPUT | MUX_MODE0)           /* gpmc_advn_ale.gpmc_advn_ale */
+                0x94 (PIN_OUTPUT | MUX_MODE0)           /* gpmc_oen_ren.gpmc_oen_ren */
+                0x98 (PIN_OUTPUT | MUX_MODE0)           /* gpmc_wen.gpmc_wen */
+                0x9c (PIN_OUTPUT | MUX_MODE0)           /* gpmc_be0n_cle.gpmc_be0n_cle */
+            >;
+        };
+
+        uart0_pins: pinmux_uart0_pins {
+            pinctrl-single,pins = <
+                0x170 (PIN_INPUT_PULLUP | MUX_MODE0)	/* uart0_rxd.uart0_rxd */
+                0x174 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)	/* uart0_txd.uart0_txd */
+            >;
+        };
+
+        uart1_pins: uart1_pins {
+            pinctrl-single,pins = <
+                0x180 (PIN_INPUT_PULLUP | MUX_MODE0)    /* uart1_rxd.uart1_rxd */
+                0x184 (PIN_OUTPUT | MUX_MODE0)          /* uart1_txd.uart1_txd */
+            >;
+		};
+};
+
+&gpmc {
+        status = "okay";     
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_pins>;
+	status = "okay";
+};
+
+&uart1 {
+        pinctrl-names = "default";
+        pinctrl-0 = <&uart1_pins>;
+        status = "okay";
+};
+
+&i2c0 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&i2c0_pins>;
+
+    status = "okay";
+    clock-frequency = <400000>;
+
+    tps: tps@24 {
+		reg = <0x24>;
+    };
+};
+
+/include/ "tps65217.dtsi"
+
+&tps {
+	regulators {
+		dcdc1_reg: regulator@0 {
+			regulator-always-on;
+		};
+
+		dcdc2_reg: regulator@1 {
+			/* VDD_MPU voltage limits 0.95V - 1.26V with +/-4% tolerance */
+			regulator-name = "vdd_mpu";
+			regulator-min-microvolt = <925000>;
+			regulator-max-microvolt = <1325000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		dcdc3_reg: regulator@2 {
+			/* VDD_CORE voltage limits 0.95V - 1.1V with +/-4% tolerance */
+			regulator-name = "vdd_core";
+			regulator-min-microvolt = <925000>;
+			regulator-max-microvolt = <1150000>;
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		ldo1_reg: regulator@3 {
+			regulator-always-on;
+		};
+
+		ldo2_reg: regulator@4 {
+			regulator-always-on;
+		};
+
+		ldo3_reg: regulator@5 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+		};
+
+		ldo4_reg: regulator@6 {
+			regulator-always-on;
+		};
+	};
+};
+
+&elm {
+    	status = "okay";
+};
+
+
+/*
+/ {
+
+	pps {
+            	pinctrl-names = "default";
+            	pinctrl-0 = <&gpio4_pins>;
+	    	compatible = "pps-gpio";
+	    	gpios = <&gpio0 12 0>;
+	    	assert-falling-edge;
+	};
+};
+
+&cppi41dma  {
+        status = "okay";
+};
+
+&sham {
+        status = "okay";
+};
+
+&aes {
+        status = "okay";
+};
+*/

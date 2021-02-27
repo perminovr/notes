@@ -1,0 +1,35 @@
+--- a/networking/ifupdown.c	2018-07-02 18:23:06.000000000 +0700
++++ b/networking/ifupdown.c	2020-05-18 08:42:53.992913430 +0700
+По умолчанию udhcpс стартует по команде ifup, если в конфиге указано 'auto';
+Сейчас udhcpс будет стартовать только в ручную
+@@ -680,9 +684,12 @@
+ 	if (!execute("ifconfig %iface%[[ hw %hwaddress%]] up", ifd, exec))
+ 		return 0;
+ #  endif
++	return 1;
++	#if 0 // dhcp stoppped/started from working software instead ifupdown
+ 	return execute("udhcpc " UDHCPC_CMD_OPTIONS " -p /var/run/udhcpc.%iface%.pid "
+ 			"-i %iface%[[ -x hostname:%hostname%]][[ -c %client%]][[ -s %script%]][[ %udhcpc_opts%]]",
+ 			ifd, exec);
++	#endif
+ }
+ # else
+ static int FAST_FUNC dhcp_up(struct interface_defn_t *ifd UNUSED_PARAM,
+@@ -719,6 +726,7 @@
+ static int FAST_FUNC dhcp_down(struct interface_defn_t *ifd, execfn *exec)
+ {
+ 	int result;
++	#if 0 // dhcp stoppped/started from working software instead ifupdown
+ 	result = execute(
+ 		"test -f /var/run/udhcpc.%iface%.pid && "
+ 		"kill `cat /var/run/udhcpc.%iface%.pid` 2>/dev/null",
+@@ -729,7 +737,8 @@
+ 	/* Sleep a bit, otherwise static_down tries to bring down interface too soon,
+ 	   and it may come back up because udhcpc is still shutting down */
+ 	usleep(100000);
+-	result += static_down(ifd, exec);
++	#endif
++	result = static_down(ifd, exec) + 1;
+ 	return ((result == 3) ? 3 : 0);
+ }
+ # else

@@ -1,0 +1,266 @@
+diff --git a/examples/at/user/user_main.c b/examples/at/user/user_main.c
+index 668817b..bca86ca 100755
+--- a/examples/at/user/user_main.c
++++ b/examples/at/user/user_main.c
+@@ -22,6 +22,15 @@
+  *
+  */
+ 
++#include "hmi.h"
++
++
++#include "ets_sys.h"
++#include "ip_addr.h"
++#include "espconn.h"
++#include "mem.h"
++
++
+ #include "osapi.h"
+ #include "at_custom.h"
+ #include "user_interface.h"
+@@ -60,6 +69,8 @@
+ #error "The flash map is not supported"
+ #endif
+ 
++
++
+ #ifdef CONFIG_ENABLE_IRAM_MEMORY
+ uint32 user_iram_memory_is_enabled(void)
+ {
+@@ -67,133 +78,160 @@ uint32 user_iram_memory_is_enabled(void)
+ }
+ #endif
+ 
+-// test :AT+TEST=1,"abc"<,3>
++
++
++#if 0
++// worked exmpl
+ void ICACHE_FLASH_ATTR
+-at_setupCmdTest(uint8_t id, char *pPara)
++at_exeCmdTest(uint8_t id)
+ {
+-    int result = 0, err = 0, flag = 0;
+-    uint8 buffer[32] = {0};
+-    pPara++; // skip '='
+-
+-    //get the first parameter
+-    // digit
+-    flag = at_get_next_int_dec(&pPara, &result, &err);
+-
+-    // flag must be ture because there are more parameter
+-    if (flag == FALSE) {
+-        at_response_error();
+-        return;
+-    }
++	int res;
++	wifi_set_sleep_type(NONE_SLEEP_T);
+ 
+-    if (*pPara++ != ',') { // skip ','
+-        at_response_error();
+-        return;
+-    }
++	ip_addr_t multiIP = { .addr = ipaddr_addr("239.255.255.251") };
++	ip_addr_t hostIP = { .addr = IPADDR_ANY };
++	res = espconn_igmp_join(&hostIP, &multiIP);
++	if (res)
++		at_port_print_irom_str("espconn_igmp_join error\r\n");
+ 
+-    os_sprintf(buffer, "the first parameter:%d\r\n", result);
+-    at_port_print(buffer);
+-
+-    //get the second parameter
+-    // string
+-    at_data_str_copy(buffer, &pPara, 10);
+-    at_port_print_irom_str("the second parameter:");
+-    at_port_print(buffer);
+-    at_port_print_irom_str("\r\n");
+-
+-    if (*pPara == ',') {
+-        pPara++; // skip ','
+-        result = 0;
+-        //there is the third parameter
+-        // digit
+-        flag = at_get_next_int_dec(&pPara, &result, &err);
+-        // we donot care of flag
+-        os_sprintf(buffer, "the third parameter:%d\r\n", result);
+-        at_port_print(buffer);
+-    }
++	at_port_print_irom_str("at_exeCmdTest\r\n");
++	at_response_ok();
++}
++#endif
+ 
+-    if (*pPara != '\r') {
+-        at_response_error();
+-        return;
+-    }
+ 
+-    at_response_ok();
+-}
+ 
+ void ICACHE_FLASH_ATTR
+-at_testCmdTest(uint8_t id)
++at_setupCIPIGMPJ(uint8_t id, char *pPara)
+ {
+-    at_port_print_irom_str("at_testCmdTest\r\n");
+-    at_response_ok();
+-}
++	int res;
++    	uint8 buffer[32] = {0};
+ 
+-void ICACHE_FLASH_ATTR
+-at_queryCmdTest(uint8_t id)
+-{
+-    at_port_print_irom_str("at_queryCmdTest\r\n");
+-    at_response_ok();
++	wifi_set_sleep_type(NONE_SLEEP_T);
++
++	pPara++; // skip '='
++	res = (int)at_data_str_copy(buffer, &pPara, 15);
++	if (res <= 0) {
++		at_port_print_irom_str("parse fail\r\n");
++		goto at_setupCIPIGMPJ_err;
++	}
++
++	ip_addr_t hostIP = { .addr = IPADDR_ANY };
++	ip_addr_t multiIP = { .addr = ipaddr_addr(buffer) };
++	res = espconn_igmp_join(&hostIP, &multiIP);
++	if (res) {
++		at_port_print_irom_str("join fail\r\n");
++		goto at_setupCIPIGMPJ_err;
++	}
++
++    	at_response_ok();
++	return;
++
++at_setupCIPIGMPJ_err:
++    	at_response_error();
++	return;
+ }
+ 
++
++
+ void ICACHE_FLASH_ATTR
+-at_exeCmdTest(uint8_t id)
++at_setupCIPIGMPL(uint8_t id, char *pPara)
+ {
+-    at_port_print_irom_str("at_exeCmdTest\r\n");
+-    at_response_ok();
++	int res;
++    	uint8 buffer[32] = {0};
++
++	wifi_set_sleep_type(NONE_SLEEP_T);
++
++	pPara++; // skip '='
++	res = (int)at_data_str_copy(buffer, &pPara, 15);
++	if (res <= 0) {
++		at_port_print_irom_str("parse fail\r\n");
++		goto at_setupCIPIGMPJ_err;
++	}
++
++	ip_addr_t hostIP = { .addr = IPADDR_ANY };
++	ip_addr_t multiIP = { .addr = ipaddr_addr(buffer) };
++	res = espconn_igmp_leave(&hostIP, &multiIP);
++	if (res) {
++		at_port_print_irom_str("leave fail\r\n");
++		goto at_setupCIPIGMPJ_err;
++	}
++
++    	at_response_ok();
++	return;
++
++at_setupCIPIGMPJ_err:
++    	at_response_error();
++	return;
+ }
+ 
++
++
+ extern void at_exeCmdCiupdate(uint8_t id);
++
++
++
+ at_funcationType at_custom_cmd[] = {
+-    {"+TEST", 5, at_testCmdTest, at_queryCmdTest, at_setupCmdTest, at_exeCmdTest},
++    {"+CIPIGMPJ", 9, 0, 0, at_setupCIPIGMPJ, 0},
++    {"+CIPIGMPL", 9, 0, 0, at_setupCIPIGMPL, 0},
+ #ifdef AT_UPGRADE_SUPPORT
+-    {"+CIUPDATE", 9,       NULL,            NULL,            NULL, at_exeCmdCiupdate}
++    {"+CIUPDATE", 9, NULL, NULL, NULL, at_exeCmdCiupdate}
+ #endif
+ };
+ 
++
++
+ static const partition_item_t at_partition_table[] = {
+-    { SYSTEM_PARTITION_BOOTLOADER, 						0x0, 												0x1000},
+-    { SYSTEM_PARTITION_OTA_1,   						0x1000, 											SYSTEM_PARTITION_OTA_SIZE},
+-    { SYSTEM_PARTITION_OTA_2,   						SYSTEM_PARTITION_OTA_2_ADDR, 						SYSTEM_PARTITION_OTA_SIZE},
+-    { SYSTEM_PARTITION_RF_CAL,  						SYSTEM_PARTITION_RF_CAL_ADDR, 						0x1000},
+-    { SYSTEM_PARTITION_PHY_DATA, 						SYSTEM_PARTITION_PHY_DATA_ADDR, 					0x1000},
+-    { SYSTEM_PARTITION_SYSTEM_PARAMETER, 				SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR, 			0x3000},
+-    { SYSTEM_PARTITION_AT_PARAMETER, 					SYSTEM_PARTITION_AT_PARAMETER_ADDR, 				0x3000},
+-	{ SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY, 		SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY_ADDR, 		0x1000},
+-	{ SYSTEM_PARTITION_SSL_CLIENT_CA, 					SYSTEM_PARTITION_SSL_CLIENT_CA_ADDR, 				0x1000},
++	{ SYSTEM_PARTITION_BOOTLOADER, 0x0, 0x1000},
++	{ SYSTEM_PARTITION_OTA_1, 0x1000, SYSTEM_PARTITION_OTA_SIZE},
++	{ SYSTEM_PARTITION_OTA_2, SYSTEM_PARTITION_OTA_2_ADDR, SYSTEM_PARTITION_OTA_SIZE},
++	{ SYSTEM_PARTITION_RF_CAL, SYSTEM_PARTITION_RF_CAL_ADDR, 0x1000},
++	{ SYSTEM_PARTITION_PHY_DATA, SYSTEM_PARTITION_PHY_DATA_ADDR, 0x1000},
++	{ SYSTEM_PARTITION_SYSTEM_PARAMETER, SYSTEM_PARTITION_SYSTEM_PARAMETER_ADDR, 0x3000},
++	{ SYSTEM_PARTITION_AT_PARAMETER, SYSTEM_PARTITION_AT_PARAMETER_ADDR, 0x3000},
++	{ SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY, SYSTEM_PARTITION_SSL_CLIENT_CERT_PRIVKEY_ADDR, 0x1000},
++	{ SYSTEM_PARTITION_SSL_CLIENT_CA, SYSTEM_PARTITION_SSL_CLIENT_CA_ADDR, 0x1000},
+ #ifdef CONFIG_AT_WPA2_ENTERPRISE_COMMAND_ENABLE
+-	{ SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY, 	SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY_ADDR,	0x1000},
+-    { SYSTEM_PARTITION_WPA2_ENTERPRISE_CA, 				SYSTEM_PARTITION_WPA2_ENTERPRISE_CA_ADDR, 			0x1000},
++	{ SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY, SYSTEM_PARTITION_WPA2_ENTERPRISE_CERT_PRIVKEY_ADDR, 0x1000},
++	{ SYSTEM_PARTITION_WPA2_ENTERPRISE_CA, SYSTEM_PARTITION_WPA2_ENTERPRISE_CA_ADDR, 0x1000},
+ #endif
+ };
+ 
++
++
+ void ICACHE_FLASH_ATTR user_pre_init(void)
+ {
+-    if(!system_partition_table_regist(at_partition_table, sizeof(at_partition_table)/sizeof(at_partition_table[0]),SPI_FLASH_SIZE_MAP)) {
++	if(!system_partition_table_regist(at_partition_table, sizeof(at_partition_table)/sizeof(at_partition_table[0]),SPI_FLASH_SIZE_MAP)) {
+ 		os_printf("system_partition_table_regist fail\r\n");
+ 		while(1);
+ 	}
+ }
+ 
++
++
+ void ICACHE_FLASH_ATTR
+ user_init(void)
+ {
+-    char buf[128] = {0};
++    char buf[196] = {0};
+     at_customLinkMax = 5;
+     at_init();
+ #ifdef ESP_AT_FW_VERSION
+     if ((ESP_AT_FW_VERSION != NULL) && (os_strlen(ESP_AT_FW_VERSION) < 64)) {
+-        os_sprintf(buf,"compile time:"__DATE__" "__TIME__"\r\n"ESP_AT_FW_VERSION);
++        os_sprintf(buf,"compile time:"__DATE__" "__TIME__"\r\n"ESP_AT_FW_VERSION"\r\nhmi ver: %s", HMI_VER[0]);
+     } else {
+-        os_sprintf(buf,"compile time:"__DATE__" "__TIME__);
++        os_sprintf(buf,"compile time:"__DATE__" "__TIME__"\r\nhmi ver: %s", HMI_VER[0]);
+     }
+ #else
+-    os_sprintf(buf,"compile time:"__DATE__" "__TIME__);
++    os_sprintf(buf,"compile time:"__DATE__" "__TIME__"\r\nhmi ver: %s", HMI_VER[0]);
+ #endif
+     at_set_custom_info(buf);
+     at_port_print_irom_str("\r\nready\r\n");
+-    at_cmd_array_regist(&at_custom_cmd[0], sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
++    at_cmd_array_regist(at_custom_cmd, sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
+ #ifdef CONFIG_AT_SMARTCONFIG_COMMAND_ENABLE
+     at_cmd_enable_smartconfig();
+ #endif
+ #ifdef CONFIG_AT_WPA2_ENTERPRISE_COMMAND_ENABLE
+     at_cmd_enable_wpa2_enterprise();
+ #endif
++    wifi_set_sleep_type(NONE_SLEEP_T);
+ }

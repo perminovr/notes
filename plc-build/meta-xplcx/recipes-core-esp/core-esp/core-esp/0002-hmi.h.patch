@@ -1,0 +1,17 @@
+diff --git a/include/hmi.h b/include/hmi.h
+new file mode 100644
+index 0000000..1ca5f3f
+--- /dev/null
++++ b/include/hmi.h
+@@ -0,0 +1,11 @@
++
++#ifndef HMI_H_
++#define HMI_H_
++
++
++static char HMI_VER[][16]= {
++	#include "../hmi_version"
++};
++
++
++#endif /* HMI_H_ */

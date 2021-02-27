@@ -1,0 +1,12 @@
+--- a/default_options.h
++++ b/default_options.h
+@@ -271,7 +271,8 @@
+ #define DEFAULT_RECV_WINDOW 24576
+ /* Maximum size of a received SSH data packet - this _MUST_ be >= 32768
+    in order to interoperate with other implementations */
+-#define RECV_MAX_PAYLOAD_LEN 32768
++#undef RECV_MAX_PAYLOAD_LEN
++#define RECV_MAX_PAYLOAD_LEN (32768 + 2014)
+ /* Maximum size of a transmitted data packet - this can be any value,
+    though increasing it may not make a significant difference. */
+ #define TRANS_MAX_PAYLOAD_LEN 16384

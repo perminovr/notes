@@ -1,0 +1,20 @@
+#!/bin/sh
+
+[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+
+DHCPNOTIFIER="/home/root/Binary/dhcpnotifier"
+LIBS="/home/root/Libs/"
+
+[ "$mask" == "" ] && mask="$subnet"
+
+[ "$1" != "" ] && state="-s $1"
+[ "$interface" != "" ] && interface="-i $interface"
+[ "$ip" != "" ] && ip="-i $ip"
+[ "$mask" != "" ] && mask="-m $mask"
+[ "$router" != "" ] && router="-r $router"
+
+export LD_LIBRARY_PATH="$LIBS"
+${DHCPNOTIFIER} $state $interface $ip $mask $router
+
+exit 0
+

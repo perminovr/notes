@@ -1,0 +1,30 @@
+lcdnumber
+progressbar
+label
+	self
+
+lineedit
+	self
+	editingFinished
+
+spinbox
+slider
+dial
+	self
+	valueChanged
+
+checkbox
+	self
+	stateChanged
+
+combobox
+	self
+	currentIndexChanged
+
+pbtn
+linkbtn
+radiobtn
+	clicked
+
+action
+	triggered	
